@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Andreani.Exceptions;
+using System;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -11,12 +12,14 @@ namespace Andreani.Clients
         protected string Endpoint;
         protected Dictionary<string, string> Headers;
         protected string ContentType;
-        protected string ApiVersion;
+        public ResponseException ResponseException;
 
         #region Constants
 
+        public const string CONTENT_TYPE_TEXT_HTML = "text/html";
+        public const string CONTENT_TYPE_APP_XML = "application/xml";
         public const string CONTENT_TYPE_APP_JSON = "application/json";
-        public const string CONTENT_TYPE_X_WWW = "application/x-www-form-urlencoded";
+        public const string CONTENT_TYPE_APP_X_WWW_FORM = "application/x-www-form-urlencoded";
         protected const string METHOD_POST = "POST";
         protected const string METHOD_GET = "GET";
         protected const string METHOD_PUT = "PUT";
@@ -28,51 +31,33 @@ namespace Andreani.Clients
         public RestClient(string endpoint, Dictionary<string, string> headers = null)
         {
             Endpoint = endpoint;
-            ApiVersion = "/v1/";
             Headers = new Dictionary<string, string>();
 
             SetHeaders(headers);
         }
 
-        public RestClient(string endpoint, string apiVersion, Dictionary<string, string> headers = null)
+        public RestClient(string endpoint, string contentType, Dictionary<string, string> headers = null)
         {
             Endpoint = endpoint;
-            ApiVersion = "/" + apiVersion + "/";
-            Headers = new Dictionary<string, string>();
-
-            SetHeaders(headers);
-        }
-
-        public RestClient(string endpoint, string apiVersion, string contentType, Dictionary<string, string> headers = null)
-        {
-            Endpoint = endpoint;
-            ApiVersion = "/" + apiVersion + "/";
             ContentType = contentType;
             Headers = new Dictionary<string, string>();
 
             SetHeaders(headers);
         }
 
-        protected void SetHeaders(Dictionary<string, string> headers = null)
+        public void AddHeaders(Dictionary<string, string> headers)
         {
-            if (headers != null)
-            {
-                foreach (var key in headers.Keys)
-                {
-                    Headers.Add(key, headers[key]);
-                }
-            }
+            SetHeaders(headers);
         }
 
-        public void AddHeaders(Dictionary<string, string> headers = null)
+        public void AddHeaders(string header, string value)
         {
-            if (headers != null)
+            var headers = new Dictionary<string, string>()
             {
-                foreach (var key in headers.Keys)
-                {
-                    Headers.Add(key, headers[key]);
-                }
-            }
+                { header, value }
+            };
+
+            SetHeaders(headers);
         }
 
         public void AddContentType(string contentType)
@@ -82,94 +67,113 @@ namespace Andreani.Clients
 
         public RestResponse Get(string url, string data = null)
         {
-            string uri = Endpoint + ApiVersion + url + data;
+            string uri = Endpoint + url + data;
 
             var httpWebRequest = Initialize(uri, METHOD_GET);
 
-            return DoRequest(httpWebRequest);
+            return Request(httpWebRequest);
         }
 
         public RestResponse Post(string url, string data = null)
         {
-            string uri = Endpoint + ApiVersion  + url;
+            string uri = Endpoint + url;
 
             var httpWebRequest = Initialize(uri, METHOD_POST);
 
             if (!string.IsNullOrEmpty(data))
             {
-                var bytes = Encoding.GetEncoding("iso-8859-1").GetBytes(data);
+                var bytes = Encoding.GetEncoding("ISO-8859-1").GetBytes(data);
                 httpWebRequest.ContentLength = bytes.Length;
 
                 using var writeStream = httpWebRequest.GetRequestStream();
                 writeStream.Write(bytes, 0, bytes.Length);
             }
 
-            return DoRequest(httpWebRequest);
+            return Request(httpWebRequest);
         }
 
         public RestResponse Delete(string url)
         {
-            string uri = Endpoint + ApiVersion + url;
+            string uri = Endpoint + url;
 
             var httpWebRequest = Initialize(uri, METHOD_DELETE);
             httpWebRequest.ContentType = null;
 
-            return DoRequest(httpWebRequest);
+            return Request(httpWebRequest);
         }
 
         public RestResponse Put(string url, string data = null)
         {
-            string uri = Endpoint + ApiVersion + url;
+            string uri = Endpoint + url;
 
             var httpWebRequest = Initialize(uri, METHOD_PUT);
 
             if (!string.IsNullOrEmpty(data))
             {
-                var bytes = Encoding.GetEncoding("iso-8859-1").GetBytes(data);
+                var bytes = Encoding.GetEncoding("ISO-8859-1").GetBytes(data);
                 httpWebRequest.ContentLength = bytes.Length;
 
                 using var writeStream = httpWebRequest.GetRequestStream();
                 writeStream.Write(bytes, 0, bytes.Length);
             }
 
-            return DoRequest(httpWebRequest);
+            return Request(httpWebRequest);
         }
 
-        protected HttpWebRequest Initialize(string uri, string method)
+        private void SetHeaders(Dictionary<string, string> headers = null)
         {
-            HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(uri);
+            if (headers != null)
+            {
+                foreach (var h in headers)
+                {
+                    Headers.Add(h.Key, h.Value);
+                }
+            }
+        }
+
+        private HttpWebRequest Initialize(string uri, string method)
+        {
+            var httpWebRequest = (HttpWebRequest)WebRequest.Create(uri);
             httpWebRequest.Method = method;
 
             httpWebRequest.ContentLength = 0;
+            httpWebRequest.Accept = CONTENT_TYPE_APP_JSON + "," + CONTENT_TYPE_APP_XML;
 
             if (!string.IsNullOrEmpty(ContentType))
-                httpWebRequest.ContentType = ContentType;
-            else
-                httpWebRequest.ContentType = CONTENT_TYPE_APP_JSON;
-
-            if (Headers != null && Headers.Count > 0)
             {
-                foreach (string key in Headers.Keys)
+                httpWebRequest.ContentType = ContentType;
+            } 
+            else
+            {
+                httpWebRequest.ContentType = CONTENT_TYPE_APP_JSON;
+            }
+
+            if (Headers?.Count > 0)
+            {
+                foreach (var h in Headers)
                 {
-                    httpWebRequest.Headers.Add(key, Headers[key]);
+                    httpWebRequest.Headers.Add(h.Key, h.Value);
                 }
             }
 
             return httpWebRequest;
         }
 
-        protected RestResponse DoRequest(HttpWebRequest httpWebRequest)
+        private RestResponse Request(HttpWebRequest httpWebRequest)
         {
-            RestResponse result = new RestResponse();
-            result.Response = string.Empty;
+            var result = new RestResponse
+            {
+                Response = string.Empty
+            };
 
             try
             {
                 using var response = (HttpWebResponse)httpWebRequest.GetResponse();
                 result.StatusCode = (int)response.StatusCode;
+                result.StatusDescription = response.StatusDescription;
+                result.Headers = response.Headers;
 
-                if (response.StatusCode != HttpStatusCode.OK && response.StatusCode != HttpStatusCode.Created
-                    && response.StatusCode != HttpStatusCode.NoContent)
+                if (response.StatusCode != HttpStatusCode.OK && response.StatusCode != HttpStatusCode.Created && response.StatusCode != HttpStatusCode.NoContent)
                 {
                     var message = string.Format("Request failed. Received HTTP {0}", response.StatusCode);
                     result.Response = message;
@@ -188,8 +192,11 @@ namespace Andreani.Clients
             {
                 if (ex.Status == WebExceptionStatus.ProtocolError)
                 {
-                    result.StatusCode = (int)((HttpWebResponse)ex.Response).StatusCode;
-                    using var responseStream = ((HttpWebResponse)ex.Response).GetResponseStream();
+                    var response = (HttpWebResponse)ex.Response;
+                    result.StatusCode = (int)response.StatusCode;
+                    result.StatusDescription = response.StatusDescription;
+
+                    using var responseStream = response.GetResponseStream();
                     if (responseStream != null)
                     {
                         using var reader = new StreamReader(responseStream);
@@ -199,12 +206,14 @@ namespace Andreani.Clients
                 else
                 {
                     result.StatusCode = 500;
+                    result.StatusDescription = "Internal Server Error";
                     result.Response = ex.Message;
                 }
             }
             catch (Exception ex)
             {
                 result.StatusCode = 500;
+                result.StatusDescription = "Internal Server Error";
                 result.Response = ex.Message;
             }
 

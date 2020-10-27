@@ -1,17 +1,22 @@
-﻿using System;
+﻿using Andreani.Clients;
 using Andreani.Models;
 
 namespace Andreani.Exceptions
 {
-    public class ResponseException : Exception
+    public class ResponseException
     {
         protected ErrorResponse ErrorResponse;
 
-        public ResponseException(string message) : base(message)
+        public ResponseException(RestResponse response)
         {
+            ErrorResponse = new ErrorResponse
+            {
+                Title = response.StatusDescription,
+                Status = response.StatusCode.ToString()
+            };
         }
 
-        public ResponseException(string message, ErrorResponse errorResponse) : base(message)
+        public ResponseException(ErrorResponse errorResponse)
         {
             ErrorResponse = errorResponse;
         }

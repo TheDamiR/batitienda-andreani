@@ -1,27 +1,20 @@
-﻿using System.Collections.Generic;
-using Newtonsoft.Json;
-using Andreani.Clients;
-using Andreani.Exceptions;
+﻿using Andreani.Clients;
 using Andreani.Models;
+using System.Collections.Generic;
 
 namespace Andreani.Services
 {
     public class Provinces : Service
     {
-        public Provinces(string endpoint, string token) : base(endpoint)
+        public Provinces(string endpoint) : base(endpoint)
         {
-            var headers = new Dictionary<string, string>
-            {
-                { "x-authorization-token", token }
-            };
-
-            Client = new RestClient(endpoint, headers);
+            Client = new RestClient(endpoint);
         }
 
-        public ProvinceResponse Execute()
+        public ProvinceResponse Get()
         {
             var response = new ProvinceResponse();
-            var result = Client.Get("regiones");
+            var result = Client.Get("/v1/regiones");
 
             if (IsOkResponse(result))
             {
@@ -29,14 +22,7 @@ namespace Andreani.Services
             }
             else
             {
-                if (IsErrorResponse(result.StatusCode))
-                {
-                    throw new ResponseException(result.StatusCode.ToString(), JsonConvert.DeserializeObject<ErrorResponse>(result.Response));
-                } 
-                else
-                {
-                    throw new ResponseException(result.StatusCode + " - " + result.Response);
-                }
+                BuildError(result);
             }
 
             return response;

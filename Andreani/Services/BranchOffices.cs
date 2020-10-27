@@ -1,27 +1,20 @@
-﻿using System.Collections.Generic;
-using Newtonsoft.Json;
-using Andreani.Clients;
+﻿using Andreani.Clients;
 using Andreani.Models;
-using Andreani.Exceptions;
+using System.Collections.Generic;
 
 namespace Andreani.Services
 {
     public class BranchOffices : Service
     {
-        public BranchOffices(string endpoint, string token) : base(endpoint)
+        public BranchOffices(string endpoint) : base(endpoint)
         {
-            var headers = new Dictionary<string, string>
-            {
-                { "x-authorization-token", token }
-            };
-
-            Client = new RestClient(endpoint, headers);
+            Client = new RestClient(endpoint);
         }
 
-        public BranchOfficeResponse Execute()
+        public BranchOfficeResponse Get()
         {
             var response = new BranchOfficeResponse();
-            var result = Client.Get("sucursales");
+            var result = Client.Get("/v1/sucursales");
 
             if (IsOkResponse(result))
             {
@@ -29,14 +22,7 @@ namespace Andreani.Services
             }
             else
             {
-                if (IsErrorResponse(result.StatusCode))
-                {
-                    throw new ResponseException(result.StatusCode.ToString(), JsonConvert.DeserializeObject<ErrorResponse>(result.Response));
-                }
-                else
-                {
-                    throw new ResponseException(result.StatusCode + " - " + result.Response);
-                }
+                BuildError(result);
             }
 
             return response;

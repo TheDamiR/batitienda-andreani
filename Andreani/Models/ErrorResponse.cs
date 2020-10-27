@@ -2,7 +2,9 @@
 {
     public class ErrorResponse
     {
-        public string message { get; set; }
-        public string code { get; set; }
+        public string Type { get; set; }
+        public string Title { get; set; }
+        public string Detail { get; set; }
+        public string Status { get; set; }
     }
 }
