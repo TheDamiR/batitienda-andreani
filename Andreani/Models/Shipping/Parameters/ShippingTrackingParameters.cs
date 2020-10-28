@@ -2,7 +2,7 @@
 
 namespace Andreani.Models.Shipping.Parameters
 {
-    public class ShippingParameters
+    public class ShippingTrackingParameters
     {
         public string CodeCustomer { get; set; }
         public string CodeContract { get; set; }
@@ -12,7 +12,7 @@ namespace Andreani.Models.Shipping.Parameters
         public DateTime? CreationDateUntil { get; set; }
         public int Limit { get; set; }
 
-        public ShippingParameters()
+        public ShippingTrackingParameters()
         {
             Limit = 10;
         }

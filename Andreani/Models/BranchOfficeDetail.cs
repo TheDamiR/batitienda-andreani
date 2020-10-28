@@ -1,16 +1,16 @@
 ﻿using Newtonsoft.Json;
 
-namespace Andreani.Models.Shipping
+namespace Andreani.Models
 {
-    public class ShippingDistributionBranchOffice
+    public class BranchOfficeDetail
     {
         [JsonProperty("id")]
         public int Id { get; set; }
 
         [JsonProperty("nomenclatura")]
-        public string Nomenclatura { get; set; }
+        public string Nomenclature { get; set; }
 
         [JsonProperty("descripcion")]
-        public string Descripcion { get; set; }
+        public string Description { get; set; }
     }
 }

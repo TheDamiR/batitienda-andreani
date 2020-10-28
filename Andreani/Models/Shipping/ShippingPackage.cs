@@ -4,16 +4,16 @@ namespace Andreani.Models.Shipping
 {
     public class ShippingPackage
     {
+        [JsonProperty("IdDeProducto")]
+        public string ProductId { get; set; }
+
         [JsonProperty("kilos")]
         public double Kilos { get; set; }
 
         [JsonProperty("valorDeclaradoConImpuestos")]
-        public int ValorDeclaradoConImpuestos { get; set; }
-
-        [JsonProperty("IdDeProducto")]
-        public string IdDeProducto { get; set; }
+        public double DeclaredAmountWithTaxes { get; set; }
 
         [JsonProperty("volumen")]
-        public int Volumen { get; set; }
+        public double Volume { get; set; }
     }
 }

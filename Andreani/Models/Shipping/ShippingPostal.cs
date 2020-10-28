@@ -2,10 +2,10 @@
 
 namespace Andreani.Models.Shipping
 {
-    public class ShippingPostcard
+    public class ShippingPostal
     {
         [JsonProperty("localidad")]
-        public string Localidad { get; set; }
+        public string Location { get; set; }
 
         [JsonProperty("region")]
         public string Region { get; set; }
@@ -14,12 +14,12 @@ namespace Andreani.Models.Shipping
         public string Comment { get; set; }
 
         [JsonProperty("pais")]
-        public string Pais { get; set; }
+        public string Country { get; set; }
 
         [JsonProperty("direccion")]
-        public string Direccion { get; set; }
+        public string Address { get; set; }
 
         [JsonProperty("codigoPostal")]
-        public string CodigoPostal { get; set; }
+        public string PostalCode { get; set; }
     }
 }

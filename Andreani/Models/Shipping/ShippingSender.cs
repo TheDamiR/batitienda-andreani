@@ -5,12 +5,12 @@ namespace Andreani.Models.Shipping
     public class ShippingSender
     {
         [JsonProperty("nombreYApellido")]
-        public object NombreYApellido { get; set; }
+        public string NameAndSurname { get; set; }
 
         [JsonProperty("tipoYNumeroDeDocumento")]
-        public object TipoYNumeroDeDocumento { get; set; }
+        public string TypeAndNumberDocument { get; set; }
 
         [JsonProperty("eMail")]
-        public object EMail { get; set; }
+        public string EmailAddress { get; set; }
     }
 }

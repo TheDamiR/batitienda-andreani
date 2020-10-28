@@ -5,6 +5,6 @@ namespace Andreani.Models.Shipping
     public class ShippingDestination
     {
         [JsonProperty("Postal")]
-        public ShippingPostcard Postal { get; set; }
+        public ShippingPostal Postcard { get; set; }
     }
 }

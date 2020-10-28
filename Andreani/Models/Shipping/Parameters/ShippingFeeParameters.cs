@@ -13,7 +13,7 @@
         public double? Volume { get; set; } //cm3.
         public double? Kilos { get; set; } //kg. lol
         public double? ChargeableWeight { get; set; }
-        public int? DeclaredAmount { get; set; }
+        public double? DeclaredAmount { get; set; }
         public string Category { get; set; }
     }
 }

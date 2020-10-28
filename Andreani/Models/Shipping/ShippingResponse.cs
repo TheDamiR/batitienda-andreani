@@ -4,42 +4,36 @@ using System.Collections.Generic;
 
 namespace Andreani.Models.Shipping
 {
-    public class ShippingSingleResponse : BaseModel
+    public class ShippingResponse : BaseModel
     {
         [JsonProperty("numeroDeTracking")]
-        public string NumeroDeTracking { get; set; }
+        public string NumberTracking { get; set; }
 
         [JsonProperty("contrato")]
-        public string Contrato { get; set; }
+        public string CodeContract { get; set; }
 
         [JsonProperty("estado")]
-        public string Estado { get; set; }
+        public string Status { get; set; }
 
         [JsonProperty("sucursalDeDistribucion")]
-        public ShippingDistributionBranchOffice SucursalDeDistribucion { get; set; }
+        public BranchOfficeDetail DistributionBranchOffice { get; set; }
 
         [JsonProperty("fechaCreacion")]
-        public DateTime FechaCreacion { get; set; }
+        public DateTime CreationDate { get; set; }
 
         [JsonProperty("destino")]
-        public ShippingDestination Destino { get; set; }
+        public ShippingDestination Destination { get; set; }
 
         [JsonProperty("remitente")]
-        public ShippingSender Remitente { get; set; }
+        public ShippingSender Sender { get; set; }
 
         [JsonProperty("destinatario")]
-        public ShippingRecipient Destinatario { get; set; }
+        public ShippingRecipient Recipient { get; set; }
 
         [JsonProperty("bultos")]
-        public List<ShippingPackage> Bultos { get; set; }
+        public IList<ShippingPackage> Packages { get; set; }
 
         [JsonProperty("referencias")]
-        public List<string> Referencias { get; set; }
-    }
-
-    public class ShippingListResponse : BaseModel
-    {
-        [JsonProperty("envios")]
-        public List<ShippingSingleResponse> Envios { get; set; }
+        public IList<string> References { get; set; }
     }
 }

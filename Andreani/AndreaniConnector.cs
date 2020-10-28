@@ -2,6 +2,8 @@
 using Andreani.Models;
 using Andreani.Models.Shipping;
 using Andreani.Models.Shipping.Parameters;
+using Andreani.Models.Orders;
+using Andreani.Models.Orders.Parameters;
 
 namespace Andreani
 {
@@ -9,17 +11,12 @@ namespace Andreani
     {
         #region Constants
 
-        public const string VERSION = "0.0.2";
+        public const string VERSION = "0.0.4";
 
         private const string REQUEST_HOST_PRODUCTION = "https://api.andreani.com";
         private const string REQUEST_HOST_DEVELOPMENT = "https://api.qa.andreani.com";
 
         #endregion
-
-        private string CodeCustomer = "CL0003750";
-        private string CodeShipmentsToBranchOffice = "400006711";
-        private string CodeStandardShipmentsToHome = "400006709";
-        private string CodeUrgentShipmentsToHome = "400006710";
 
         private string Endpoint;
         private string Token;
@@ -27,11 +24,12 @@ namespace Andreani
         private Provinces Provinces;
         private BranchOffices BranchOffices;
         private Shipping Shipping;
+        private Orders Orders;
         private Login Login;
 
-        public AndreaniConnector(string accessToken, bool isDevMode = true)
+        public AndreaniConnector(string accessToken = "")
         {
-            Endpoint = isDevMode ? REQUEST_HOST_DEVELOPMENT : REQUEST_HOST_PRODUCTION;
+            Endpoint = REQUEST_HOST_DEVELOPMENT;
             Token = accessToken;
 
             Init();
@@ -42,6 +40,7 @@ namespace Andreani
             Endpoint = isDevMode ? REQUEST_HOST_DEVELOPMENT : REQUEST_HOST_PRODUCTION;
 
             Login = new Login(Endpoint, username, password);
+            Token = GetToken();
 
             Init();
         }
@@ -51,6 +50,7 @@ namespace Andreani
             Provinces = new Provinces(Endpoint);
             BranchOffices = new BranchOffices(Endpoint);
             Shipping = new Shipping(Endpoint, Token);
+            Orders = new Orders(Endpoint, Token);
         }
 
         #region Exceptions
@@ -68,11 +68,21 @@ namespace Andreani
         {
             return BranchOffices.GetResponseException();
         }
+
+        public ErrorResponse GetShippingException()
+        {
+            return Shipping.GetResponseException();
+        }
+
+        public ErrorResponse GetOrderException()
+        {
+            return Orders.GetResponseException();
+        }
         #endregion
 
         public string GetToken()
         {
-            return Login.Execute();
+            return Login.Get();
         }
 
         public ProvinceResponse GetProvinces()
@@ -90,14 +100,34 @@ namespace Andreani
             return Shipping.ShippingFee(data);
         }
 
-        public ShippingListResponse SearchShipping(ShippingParameters data)
+        public ShippingTracesResponse GetShippingTraces(string number)
         {
-            return Shipping.SearchShipping(data);
+            return Shipping.GetShippingTraces(number);
         }
 
-        public ShippingSingleResponse GetShipping(string number)
+        public ShippingListResponse ShippingTracking(ShippingTrackingParameters data)
+        {
+            return Shipping.ShippingTracking(data);
+        }
+
+        public ShippingResponse GetShipping(string number)
         {
             return Shipping.GetShipping(number);
+        }
+
+        public OrderResponse GetOrder(string number)
+        {
+            return Orders.Get(number);
+        }
+
+        public string GetLabelFromOrder(string number)
+        {
+            return Orders.GetLabel(number);
+        }
+
+        public OrderResponse CreateOrder(OrderCreateParameters data)
+        {
+            return Orders.Create(data);
         }
     }
 }

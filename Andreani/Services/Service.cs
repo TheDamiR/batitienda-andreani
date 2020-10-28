@@ -1,10 +1,8 @@
 ﻿using Andreani.Clients;
 using Andreani.Exceptions;
 using Andreani.Models;
-using Newtonsoft.Json;
-using System.Linq;
-using System.Xml;
-using System.Xml.Linq;
+using System;
+using System.Text;
 
 namespace Andreani.Services
 {
@@ -14,68 +12,39 @@ namespace Andreani.Services
         protected RestClient Client;
         protected string Endpoint;
 
-        protected const int STATUS_OK = 200;
-        protected const int STATUS_UNAUTHORIZED = 401;
-        protected const int STATUS_BAD_REQUEST = 400;
-        protected const int STATUS_INTERNAL_ERROR = 500;
-
         protected Service(string endpoint)
         {
             Endpoint = endpoint;
         }
 
+        protected string GetCredentials(string username, string password)
+        {
+            var enconded = Encoding.GetEncoding("ISO-8859-1").GetBytes(username + ":" + password);
+            return Convert.ToBase64String(enconded);
+        }
+
         protected bool IsOkResponse(RestResponse response)
         {
-            return response.StatusCode == STATUS_OK && !string.IsNullOrWhiteSpace(response.Response);
+            return response.StatusCode == 200 && !string.IsNullOrWhiteSpace(response.Response);
         }
 
         protected bool IsErrorResponse(RestResponse response)
         {
-            return response.StatusCode >= STATUS_BAD_REQUEST && response.StatusCode < STATUS_INTERNAL_ERROR;
+            return response.StatusCode >= 400 && response.StatusCode <= 500;
         }
 
-        protected ResponseException BuildError(RestResponse response)
+        protected void BuildError(RestResponse response)
         {
             if (IsErrorResponse(response))
             {
-                if (response.StatusCode == STATUS_UNAUTHORIZED)
-                {
-                    try
-                    {
-                        var xml = XDocument.Parse(response.Response);
-                        XNamespace ns = "http://schemas.xmlsoap.org/soap/envelope/";
-
-                        var fault = xml.Descendants(ns + "Fault").FirstOrDefault();
-                        var faultCode = fault?.Descendants("faultcode").FirstOrDefault()?.Value ?? "unknown";
-                        var faultString = fault?.Descendants("faultstring").FirstOrDefault()?.Value ?? "unknown";
-
-                        return ResponseException = new ResponseException(new ErrorResponse 
-                        { 
-                            Title = response.StatusDescription,
-                            Detail = faultCode + " - " + faultString,
-                            Status = response.StatusCode.ToString()
-                        });
-                    } 
-                    catch (XmlException) { }
-                } 
-                else if (response.StatusCode == STATUS_BAD_REQUEST)
-                {
-                    try
-                    {
-                        var error = JsonConvert.DeserializeObject<ErrorResponse>(response.Response);
-                        return ResponseException = new ResponseException(error);
-                    } catch (JsonException) { }
-                }
-
-                return ResponseException = new ResponseException(response);
+                var ex = new BuildException(response);
+                ResponseException = ex.BuildError();
             }
-
-            return null;
         }
 
         public ErrorResponse GetResponseException()
         {
-            return ResponseException.GetErrorResponse();
+            return ResponseException?.GetErrorResponse();
         }
     }
 }

@@ -11,7 +11,10 @@ namespace Andreani.Models
 
         public string ToJson(object data)
         {
-            return JsonConvert.SerializeObject(data);
+            return JsonConvert.SerializeObject(data, Formatting.None, new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            });
         }
     }
 }
