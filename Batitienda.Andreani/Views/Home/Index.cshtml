@@ -1,3 +1,55 @@
 ﻿@{
     ViewData["Title"] = "Inicio";
 }
+
+<h2>Cotizar mi envío</h2>
+
+<div class="input-group mb-3">
+    <input type="text" class="form-control" placeholder="Código postal" id="postalCode" />
+    <div class="input-group-append">
+        <button class="btn btn-secondary" type="button" id="quote">Cotizar</button>
+    </div>
+</div>
+<h4 class="d-block result"></h4>
+
+
+<div class="mt-4">
+    <button class="btn btn-secondary" type="button" id="label">Obtener etiqueta</button>
+</div>
+
+@section Scripts {
+    <script>
+        $('#quote').on('click', function () {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("RateShipment", "Andreani")",
+                data: {
+                    productId: 1000,
+                    postalCode: $('#postalCode').val()
+                },
+                dataType: "json",
+                success: function (response) {
+                    if (response.feeWithIva) {
+                        $('.result').text('Andreani: total $' + response.feeWithIva.total + ' c/Iva')
+                    } else {
+                        $('.result').text('No hay cotizaciones disponibles')
+                    }
+                }
+            });
+        })
+
+        $('#label').on('click', function () {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("Label", "Andreani")",
+                data: {
+                    andreaniNumber: "*10000000555465",
+                },
+                dataType: "json",
+                success: function (response) {
+                    console.log(response);
+                }
+            });
+        })
+    </script>
+}

@@ -27,20 +27,18 @@ namespace Andreani
         private Orders Orders;
         private Login Login;
 
-        public AndreaniConnector(string accessToken = "")
+        public AndreaniConnector(bool isDevMode = false)
         {
-            Endpoint = REQUEST_HOST_DEVELOPMENT;
-            Token = accessToken;
+            Endpoint = isDevMode ? REQUEST_HOST_DEVELOPMENT : REQUEST_HOST_PRODUCTION;
 
             Init();
         }
 
-        public AndreaniConnector(string username, string password, bool isDevMode = true)
+        public AndreaniConnector(string username, string password, bool isDevMode = false)
         {
             Endpoint = isDevMode ? REQUEST_HOST_DEVELOPMENT : REQUEST_HOST_PRODUCTION;
 
             Login = new Login(Endpoint, username, password);
-            Token = GetToken();
 
             Init();
         }
@@ -49,8 +47,8 @@ namespace Andreani
         {
             Provinces = new Provinces(Endpoint);
             BranchOffices = new BranchOffices(Endpoint);
-            Shipping = new Shipping(Endpoint, Token);
-            Orders = new Orders(Endpoint, Token);
+            Shipping = new Shipping(Endpoint, Login);
+            Orders = new Orders(Endpoint, Login);
         }
 
         #region Exceptions

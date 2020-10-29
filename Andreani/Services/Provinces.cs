@@ -13,12 +13,15 @@ namespace Andreani.Services
 
         public ProvinceResponse Get()
         {
-            var response = new ProvinceResponse();
+            ProvinceResponse response = null;
             var result = Client.Get("/v1/regiones");
 
             if (IsOkResponse(result))
             {
-                response.Provinces = response.ToObject<IList<Province>>(result.Response);
+                response = new ProvinceResponse
+                {
+                    Provinces = Model.ToObject<IList<Province>>(result.Response)
+                };
             }
             else
             {

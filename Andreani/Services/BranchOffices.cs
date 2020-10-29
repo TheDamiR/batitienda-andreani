@@ -13,12 +13,15 @@ namespace Andreani.Services
 
         public BranchOfficeResponse Get()
         {
-            var response = new BranchOfficeResponse();
+            BranchOfficeResponse response = null;
             var result = Client.Get("/v1/sucursales");
 
             if (IsOkResponse(result))
             {
-                response.BranchOffices = response.ToObject<IList<BranchOffice>>(result.Response);
+                response = new BranchOfficeResponse
+                {
+                    BranchOffices = Model.ToObject<IList<BranchOffice>>(result.Response)
+                };
             }
             else
             {

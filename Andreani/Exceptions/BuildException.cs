@@ -18,7 +18,9 @@ namespace Andreani.Exceptions
         {
             Response = data.Response;
             StatusCode = data.StatusCode;
-            StatusDescription = data.StatusDescription;
+
+            var httpStatusCode = (HttpStatusCode)data.StatusCode;
+            StatusDescription = !string.IsNullOrWhiteSpace(data.StatusDescription) ? data.StatusDescription : httpStatusCode.ToString();
         }
 
         private ResponseException ResponseUnknown(string detail = "unknown")

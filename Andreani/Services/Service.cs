@@ -1,26 +1,37 @@
 ﻿using Andreani.Clients;
 using Andreani.Exceptions;
 using Andreani.Models;
-using System;
-using System.Text;
+using System.Collections.Generic;
 
 namespace Andreani.Services
 {
     public abstract class Service
     {
+        protected Login Login;
+        protected string Endpoint;
         protected ResponseException ResponseException;
         protected RestClient Client;
-        protected string Endpoint;
+        protected BaseModel Model;
+
+        protected Service(string endpoint, Login login)
+        {
+            Login = login;
+            Endpoint = endpoint;
+            Model = new BaseModel();
+        }
 
         protected Service(string endpoint)
         {
             Endpoint = endpoint;
+            Model = new BaseModel();
         }
 
-        protected string GetCredentials(string username, string password)
+        protected Dictionary<string, string> GetAuthorizationHeader()
         {
-            var enconded = Encoding.GetEncoding("ISO-8859-1").GetBytes(username + ":" + password);
-            return Convert.ToBase64String(enconded);
+            return new Dictionary<string, string>()
+            {
+                { "x-authorization-token", Login?.Get() }
+            };
         }
 
         protected bool IsOkResponse(RestResponse response)

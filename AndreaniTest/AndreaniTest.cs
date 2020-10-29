@@ -14,7 +14,7 @@ namespace AndreaniTest
         [TestMethod]
         public void CanDoLogin()
         {
-            var connector = new AndreaniConnector("eCommerce_Integra", "passw0rd");
+            var connector = new AndreaniConnector("eCommerce_Integra", "passw0rd", true);
 
             var result = connector.GetToken();
 
@@ -24,7 +24,7 @@ namespace AndreaniTest
 
         [TestMethod]
         public void CanCreateOrder() {
-            var connector = new AndreaniConnector("PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz");
+            var connector = new AndreaniConnector("eCommerce_Integra", "passw0rd", true);
 
             var result = connector.CreateOrder(new OrderCreateParameters
             {
@@ -141,23 +141,29 @@ namespace AndreaniTest
                 }
             });
 
-            Assert.IsNotNull(result.Status, connector.GetOrderException()?.Detail);
+            var error = connector.GetOrderException()?.Detail;
+
+            Assert.IsNotNull(result, error);
+            Assert.IsNotNull(result?.Status, error);
         }
 
         [TestMethod]
         public void CanGetOrder()
         {
-            var connector = new AndreaniConnector("PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz");
+            var connector = new AndreaniConnector("eCommerce_Integra", "passw0rd", true);
 
             var result = connector.GetOrder("360000000036820");
 
-            Assert.IsNotNull(result.Status, connector.GetOrderException()?.Detail);
+            var error = connector.GetOrderException()?.Detail;
+
+            Assert.IsNotNull(result, error);
+            Assert.IsNotNull(result?.Packages?.Count > 0, error);
         }
 
         [TestMethod]
         public void CanGetLabelFromOrder()
         {
-            var connector = new AndreaniConnector("PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz");
+            var connector = new AndreaniConnector("eCommerce_Integra", "passw0rd", true);
 
             var result = connector.GetLabelFromOrder("360000000036820");
 
@@ -167,7 +173,7 @@ namespace AndreaniTest
         [TestMethod]
         public void CanCalcShippingFee()
         {
-            var connector = new AndreaniConnector("PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz"); // only for test
+            var connector = new AndreaniConnector(true);
 
             var result = connector.CalcShippingFee(new ShippingFeeParameters 
             { 
@@ -176,17 +182,20 @@ namespace AndreaniTest
                 CodeCustomer = "CL0003750",
                 BranchOfficeOrigin = "BAR",
                 DeclaredAmount = 1500,
-                Kilos = 1.5,
+                Weight = 1.5,
                 Volume = 200
             });
 
-            Assert.AreEqual(1500.00, result.ChargeableWeight, connector.GetShippingException()?.Detail);
+            var error = connector.GetShippingException()?.Detail;
+
+            Assert.IsNotNull(result, error);
+            Assert.AreEqual(1500.00, result?.ChargeableWeight, error);
         }
 
         [TestMethod]
         public void CanShippingTracking()
         {
-            var connector = new AndreaniConnector("PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz"); // only for test
+            var connector = new AndreaniConnector("eCommerce_Integra", "passw0rd", true);
 
             var result = connector.ShippingTracking(new ShippingTrackingParameters
             {
@@ -196,47 +205,62 @@ namespace AndreaniTest
                 CodeCustomer = "CL0003750"
             });
 
-            Assert.IsTrue(result.Shipping?.Count > 0, connector.GetShippingException()?.Detail);
+            var error = connector.GetShippingException()?.Detail;
+
+            Assert.IsNotNull(result, error);
+            Assert.IsTrue(result?.Shipping?.Count > 0, error);
         }
 
         [TestMethod]
         public void CanGetShippingTraces()
         {
-            var connector = new AndreaniConnector("PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz"); // only for test
+            var connector = new AndreaniConnector("eCommerce_Integra", "passw0rd", true);
 
             var result = connector.GetShippingTraces("360000036137650");
 
-            Assert.IsTrue(result.Events?.Count > 0, connector.GetShippingException()?.Detail);
+            var error = connector.GetShippingException()?.Detail;
+
+            Assert.IsNotNull(result, error);
+            Assert.IsTrue(result?.Events?.Count > 0, error);
         }
 
         [TestMethod]
         public void CanGetShipping()
         {
-            var connector = new AndreaniConnector("PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz"); // only for test
+            var connector = new AndreaniConnector("eCommerce_Integra", "passw0rd", true);
 
             var result = connector.GetShipping("360000036137650");
 
-            Assert.IsNotNull(result.NumberTracking, connector.GetShippingException()?.Detail);
+            var error = connector.GetShippingException()?.Detail;
+
+            Assert.IsNotNull(result, error);
+            Assert.IsNotNull(result?.NumberTracking, error);
         }
 
         [TestMethod]
         public void CanGetProvinces()
         {
-            var connector = new AndreaniConnector(); // no requiere token
+            var connector = new AndreaniConnector(); // no requiere auth
 
             var result = connector.GetProvinces();
 
-            Assert.IsTrue(result.Provinces?.Count > 0, connector.GetProvinceException()?.Detail);
+            var error = connector.GetProvinceException()?.Detail;
+
+            Assert.IsNotNull(result, error);
+            Assert.IsTrue(result?.Provinces?.Count > 0, error);
         }
 
         [TestMethod]
         public void CanGetBranchOffices()
         {
-            var connector = new AndreaniConnector(); // no requiere token
+            var connector = new AndreaniConnector(); // no requiere auth
 
             var result = connector.GetBranchOffices();
 
-            Assert.IsTrue(result.BranchOffices?.Count > 0, connector.GetBranchOfficeException()?.Detail);
+            var error = connector.GetBranchOfficeException()?.Detail;
+
+            Assert.IsNotNull(result, error);
+            Assert.IsTrue(result?.BranchOffices?.Count > 0, error);
         }
     }
 }

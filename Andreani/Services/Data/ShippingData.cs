@@ -50,14 +50,24 @@ namespace Andreani.Services.Data
             if (data.Width.HasValue)
                 Query.Add("bultos[0][anchoCm]", data.Width.ToString());
 
-            if (data.High.HasValue)
-                Query.Add("bultos[0][altoCm]", data.High.ToString());
+            if (data.Height.HasValue)
+                Query.Add("bultos[0][altoCm]", data.Height.ToString());
 
             if (data.Volume.HasValue)
+            {
                 Query.Add("bultos[0][volumen]", data.Volume.ToString());
+            }
+            else
+            {
+                if (data.Width.HasValue && data.Height.HasValue && data.Length.HasValue)
+                {
+                    double volume = data.Width.Value * data.Height.Value * data.Length.Value;
+                    Query.Add("bultos[0][volumen]", volume.ToString());
+                }
+            }
 
-            if (data.Kilos.HasValue)
-                Query.Add("bultos[0][kilos]", data.Kilos.ToString());
+            if (data.Weight.HasValue)
+                Query.Add("bultos[0][kilos]", data.Weight.ToString());
 
             if (data.ChargeableWeight.HasValue)
                 Query.Add("bultos[0][pesoAforado]", data.ChargeableWeight.ToString());

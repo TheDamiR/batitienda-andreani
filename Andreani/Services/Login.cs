@@ -1,4 +1,6 @@
 ﻿using Andreani.Clients;
+using System;
+using System.Text;
 using System.Collections.Generic;
 
 namespace Andreani.Services
@@ -7,7 +9,8 @@ namespace Andreani.Services
     {
         public Login(string endpoint, string username, string password) : base(endpoint)
         {
-            var credentials = GetCredentials(username, password);
+            var enconded = Encoding.GetEncoding("ISO-8859-1").GetBytes(username + ":" + password);
+            var credentials = Convert.ToBase64String(enconded);
 
             var headers = new Dictionary<string, string>()
             {
