@@ -337,8 +337,3 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
-
-Batitienda.Prisma.DECIDIR/bin/*
-!Batitienda.Prisma.DECIDIR/bin/Decidir.dll
-!Batitienda.Prisma.DECIDIR/bin/Decidir.pdb
-!Batitienda.Prisma.DECIDIR/bin/Decidir.xml
